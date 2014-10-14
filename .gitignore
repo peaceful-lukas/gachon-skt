@@ -1,0 +1,8 @@
+.DS_Store
+derby.log
+cache/
+.settings/
+.project
+.classpath
+target/
+tmp/

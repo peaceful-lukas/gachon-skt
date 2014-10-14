@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+	<app>
+		<thread_pool_size>10</thread_pool_size>
+	</app>
+    <remote_db>
+        <connection>
+            <ip_address>127.0.0.1</ip_address>
+            <port>1521</port>
+            <dbname>PDB1</dbname>
+            <username>hr</username>
+            <password>oracle</password>
+        </connection>
+        
+        <table>
+        	<from>TWAMP</from>
+        	<to>NS3TWAMP</to>
+        </table>
+        
+        <fetch>
+            <max_rows_at_once>2</max_rows_at_once>
+            <device_list>
+                <device>38.24.0.223</device>
+                <device>38.56.0.23</device>
+                <device>38.56.0.24</device>
+            </device_list>
+        </fetch>
+    </remote_db>
+
+    <cache>
+        <enable>true</enable>
+        <margins>
+            <tx_loss>0.5</tx_loss>
+            <tx_dmean>10</tx_dmean>
+            <tx_jmean>13</tx_jmean>
+            <rx_loss>0.3</rx_loss>
+            <rx_dmean>12</rx_dmean>
+            <rx_jmean>18</rx_jmean>
+        </margins>
+    </cache>
+</config>
