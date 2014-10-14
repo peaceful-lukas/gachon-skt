@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import com.lukaslab.proj.skt.cache.CacheManager;
@@ -23,6 +22,8 @@ public class MainJob implements Job {
 
 	private List<DataObject> cachedList;
 	private List<DataObject> taskList;
+	
+	private AsyncTaskManager atm;
 
 
 
@@ -61,7 +62,7 @@ public class MainJob implements Job {
 		}
 
 
-		AsyncTaskManager atm;
+		
 		int threadPoolSize = Config.getApp().getThreadPoolSize();
 
 		// Cache Hit
@@ -71,16 +72,10 @@ public class MainJob implements Job {
 				try {
 					f.get();
 
-				} catch(ExecutionException e) {
-					// TODO : 다시 실행시켜야함.
-
-					Logger.warnln("Execution exception occurred when updating record...");
-					e.printStackTrace();
-				} catch(InterruptedException e) {
-					// TODO : 다시 실행시켜야함.
-
-					Logger.warnln("Interrupted exception occurred when updating record...");
-					e.printStackTrace();
+				} catch(Exception e) {
+					Logger.warnln("Execution exception occurred when updating record... retrying..");
+					redo(f);
+					Logger.infoln("retrying updating record is successful!");
 				}
 			}
 		});
@@ -95,18 +90,19 @@ public class MainJob implements Job {
 				try {
 					String outFileName = (String)f.get();
 					Scanner scanner = new Scanner(new File(outFileName));
-
+					
 					double result = scanner.nextDouble();
 					dataObj.setResult(result);
 
 					scanner.close();
 
 				} catch(FileNotFoundException e) {
+					// unreachable
 					e.printStackTrace();
-				} catch(ExecutionException e) {
-					e.printStackTrace();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
+				} catch(Exception e) {
+					Logger.warnln("Execution exception occurred when reading from file... retrying..");
+					redo(f);
+					Logger.infoln("retrying updating record is successful!");
 				}
 			}
 		});
@@ -120,21 +116,26 @@ public class MainJob implements Job {
 				try {
 					f.get();
 
-				} catch(ExecutionException e) {
-					// TODO : 다시 실행시켜야함.
-
-					Logger.warnln("Execution exception occurred when updating record...");
-					e.printStackTrace();
-				} catch(InterruptedException e) {
-					// TODO : 다시 실행시켜야함.
-
-					Logger.warnln("Interrupted exception occurred when updating record...");
-					e.printStackTrace();
+				} catch(Exception e) {
+					Logger.warnln("Execution exception occurred when updating record... retrying..");
+					redo(f);
+					Logger.infoln("retrying updating record is successful!");
 				}
 			}
 		});
 
 		taskList.clear();
+	}
+	
+	
+	private void redo(Future f) {
+		try {
+			f.get();
+		} catch(Exception e) {
+			redo(f);
+			Logger.warnln("exception occurred again when retrying the task..");
+			e.printStackTrace();
+		}
 	}
 
 }
